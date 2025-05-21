@@ -1,0 +1,13 @@
+# Node.js
+node_modules/
+.env
+*.log
+
+# Build
+build/
+dist/
+
+# IDE / système
+.DS_Store
+.vscode/
+.idea/
