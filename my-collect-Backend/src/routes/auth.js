@@ -5,26 +5,26 @@ const User = require('../models/User')
 
 const router = express.Router();
 
-// Route d'inscription
+// sign-in route
 router.post("/register", async (req, res) => {
     try {
         const { username, email, password } = req.body;
 
-        // Vérifier si l'user existe déjà
+        // check if the user already exists
         const existingUser = await User.findOne({
             $or: [{ email }, { username }]
         });
 
-        // Si l'User existe déjà :
+        // if the user already exists
         if (existingUser) {
             return res.status(400).json({ message: "User already exist" })
         }
 
-        // Hash du mot de passe
+        // password hash
         const salt = await bcrypt.genSalt(10);
         const hashedPassword = await bcrypt.hash(password, salt);
 
-        // Création d'un User
+        // create user
         const user = new User({
             username,
             email,
@@ -33,7 +33,7 @@ router.post("/register", async (req, res) => {
 
         await user.save();
 
-        // Création du token JWT
+        // create JWT token
         const token = jwt.sign(
             { userId: user._id },
             process.env.JWT_SECRET,
@@ -54,18 +54,18 @@ router.post("/register", async (req, res) => {
     }
 });
 
-// Route connexion
+// login route
 router.post("/login", async (req, res) => {
     try {
         const { email, password } = req.body
 
-        //trouvé l'utilisateur
+        // find user
         const user = await User.findOne({ email })
 
         if (!user) {
             return res.status(400).json({ message: 'Invalid credentials' })
         };
-        // vérifier le mot de passe
+        // password check
         const isMatch = await bcrypt.compare(password, user.password)
 
         if (!isMatch) {
@@ -89,6 +89,7 @@ router.post("/login", async (req, res) => {
     } catch (error) {
         res.status(500).json({ message: error.message })
     }
-})
+});
+
 
 module.exports = router;
