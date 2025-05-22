@@ -53,3 +53,42 @@ router.post("/register", async (req, res) => {
         res.status(500).json({ message: error.message })
     }
 });
+
+// Route connexion
+router.post("/login", async (req, res) => {
+    try {
+        const { email, password } = req.body
+
+        //trouvé l'utilisateur
+        const user = await User.findOne({ email })
+
+        if (!user) {
+            return res.status(400).json({ message: 'Invalid credentials' })
+        };
+        // vérifier le mot de passe
+        const isMatch = await bcrypt.compare(password, user.password)
+
+        if (!isMatch) {
+            return res.status(400).json({ message: 'Invalid credentials' })
+        };
+
+        const token = jwt.sign(
+            { userId: user._id },
+            { expiresIn: '7d'}
+        );
+
+        res.json ({
+            message: 'Login successfull !',
+            token,
+            user: {
+                id: user._id,
+                username: user.username,
+                email: user.email
+            }
+        });
+    } catch (error) {
+        res.status(500).json({ message: error.message })
+    }
+})
+
+module.exports = router;
