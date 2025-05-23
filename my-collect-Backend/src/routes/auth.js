@@ -1,5 +1,5 @@
 const express = require('express');
-const bcrypt = require('bcrypt');
+const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const User = require('../models/User')
 
@@ -9,6 +9,14 @@ const router = express.Router();
 router.post("/register", async (req, res) => {
     try {
         const { username, email, password } = req.body;
+
+        // password security check
+        const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+        if (!passwordRegex.test(password)) {
+            return res.status(400).json({
+                message: 'Password must be at least 8 characters long, contain uppercase and lowercase letters, a number, and a special character.'
+            });
+        }
 
         // check if the user already exists
         const existingUser = await User.findOne({
@@ -37,7 +45,7 @@ router.post("/register", async (req, res) => {
         const token = jwt.sign(
             { userId: user._id },
             process.env.JWT_SECRET,
-            {expireIn: '7d' }
+            {expiresIn: '7d' }
         );
 
         res.status(201).json({
@@ -74,6 +82,7 @@ router.post("/login", async (req, res) => {
 
         const token = jwt.sign(
             { userId: user._id },
+            process.env.JWT_SECRET,
             { expiresIn: '7d'}
         );
 

@@ -7,7 +7,7 @@ const router = express.Router();
 // retrieve all items of the logged-in user
 router.get("/", auth, async (req, res) => {
     try {
-        const items = await Item.find({ owner: req.UserId}).sort({ createdAt: -1 });
+        const items = await Item.find({ owner: req.userId}).sort({ createdAt: -1 });
         res.json(items);
     } catch (error) {
         res.status(500).json({ message: error.message });
@@ -27,7 +27,7 @@ router.post("/", auth, async (req, res) => {
             purchaseDate,
             value,
             tags,
-            owner: req.UserId
+            owner: req.userId
         });
 
         await item.save();
@@ -53,8 +53,8 @@ router.get("/:id", auth, async (req, res) => {
 // update item
 router.put("/:id", auth, async (req, res) => {
     try {
-        const item = await item.findOneAndUpdate(
-            { _id: req.params.id, owner: userId },
+        const item = await Item.findOneAndUpdate(
+            { _id: req.params.id, owner: req.userId },
             req.body,
             { new: true }
         );
